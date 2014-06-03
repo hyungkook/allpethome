@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+
+<mapper namespace="Client.Pet">
+	
+	<select id="getVaccinationSchedule" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			B.s_sgid<if test='response_type != null and response_type.equals("json")'> sgid</if>,
+			B.s_type<if test='response_type != null and response_type.equals("json")'> t</if>,
+			B.s_registrant<if test='response_type != null and response_type.equals("json")'> registrant</if>,
+			B.d_todo_date<if test='response_type != null and response_type.equals("json")'> d</if>,
+			B.s_comment<if test='response_type != null and response_type.equals("json")'> cmt</if>,
+			B.s_status<if test='response_type != null and response_type.equals("json")'> stts</if>,
+			B.s_confirmer<if test='response_type != null and response_type.equals("json")'> confirmer</if>,
+			B.s_vaccine_group<if test='response_type != null and response_type.equals("json")'> vc_group</if>,
+			B.n_vaccine_index<if test='response_type != null and response_type.equals("json")'> idx</if>,
+			B.s_group_id gid,
+			IF(B.d_todo_date > NOW(), 'Y', 'N') is_future
+		FROM
+		(
+			SELECT
+				*
+			FROM
+				DB_ALLPET.T_SCHEDULE_DETAIL
+			WHERE
+				S_UID = #{uid}
+				AND S_PID = #{pid}
+			GROUP BY S_SGID, S_UID, S_PID
+		) A, DB_ALLPET.T_SCHEDULE B
+		WHERE
+			A.S_SGID = B.S_SGID
+			<choose>
+			<when test='vc_group == null or vc_group.equals("")'>
+			AND B.S_VACCINE_GROUP IS NOT NULL
+			</when>
+			<otherwise>
+			AND B.S_VACCINE_GROUP = #{vc_group}
+			</otherwise>
+			</choose>
+		ORDER BY B.N_VACCINE_INDEX ${sort}
+		<if test="count != null and !count.equals('')">
+		LIMIT 0, ${count}
+		</if>
+	</select>
+	
+	<select id="getVaccineList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			C.group_type,
+			C.t,
+			C.ind,
+			C.term,
+			C.term_type,
+			C.len
+		FROM
+		(
+			SELECT
+				A.s_sid,
+				A.s_type t,
+				A.s_vcid,
+				A.s_group_type group_type,
+				A.n_index ind,
+				A.n_term term,
+				A.s_term_type term_type,
+				n_length len
+			FROM
+				DB_ALLPET.T_VACCINE_DETAIL A
+			WHERE
+				A.S_SID = #{sid}
+				AND S_GROUP_TYPE = #{group_type}
+			UNION
+			SELECT
+				A.s_sid,
+				A.s_type t,
+				A.s_vcid,
+				A.s_group_type group_type,
+				A.n_index ind,
+				A.n_term term,
+				A.s_term_type term_type,
+				n_length len
+			FROM
+				DB_ALLPET.T_VACCINE_DETAIL A
+			WHERE
+				A.S_SID = 'sid_common'
+				AND S_GROUP_TYPE = #{group_type}
+		) C
+		GROUP BY C.t
+	</select>
+	
+	<select id="getVaccineList1" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		
+			A.s_group_type group_type,
+			B.s_type t,
+			A.n_index ind,
+			A.n_term term,
+			A.s_term_type term_type,
+			n_length len
+		FROM
+			DB_ALLPET.T_VACCINE_DETAIL A,
+			(
+				SELECT s_vcid, s_type
+				FROM DB_ALLPET.T_VACCINE
+				WHERE
+				<choose>
+				<when test='species == null or species.equals("")'>
+				TRUE
+				</when>
+				<when test='species.equals("ALL_SPECIES")'>
+				S_SPECIES = 'ALL_SPECIES'
+				</when>
+				<otherwise>
+				(S_SPECIES = #{species} OR S_SPECIES = 'ALL_SPECIES')
+				</otherwise>
+				</choose>
+			) B
+		WHERE
+			A.S_VCID = B.S_VCID
+			<!-- AND A.S_SID = IF((SELECT COUNT(*) FROM DB_ALLPET.T_VACCINE_DETAIL WHERE S_SID = #{sid})>0,#{sid},'sid_common') -->
+			AND A.S_SID IN (#{sid}, 'sid_common')
+		GROUP BY A.S_VCID
+			<!-- AND S_GROUP_TYPE = #{group_type} -->
+		ORDER BY N_INDEX
+	</select>
+	
+</mapper>

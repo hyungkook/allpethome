@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+
+<mapper namespace="COMMON">
+
+	<select id="getElementList" parameterType="string" resultType="hashmap">
+		SELECT
+			s_group,
+			s_key,
+			s_value,
+			s_comment,
+			n_index
+		FROM
+			DB_ALLPET.T_ELEMENT
+		WHERE
+			S_GROUP = #{value}
+	</select>
+	
+	<select id="getElement" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			s_group,
+			s_key,
+			s_value,
+			s_comment,
+			n_index
+		FROM
+			DB_ALLPET.T_ELEMENT
+		WHERE
+			S_GROUP = #{group}
+			AND S_KEY = #{key}
+	</select>
+	
+	<!-- 회원 주소 검색 시작 -->
+	<select id="selectAreaSido" resultType="hashmap">
+		SELECT 	
+			S_SIDO
+		FROM 
+			DB_ALLPET.T_LOCATION_INFO 
+		GROUP BY S_SIDO	
+	</select>
+	
+	<select id="selectAreaGugun" resultType="hashmap" parameterType="java.lang.String">
+		SELECT 	
+			S_GUGUN
+		FROM 
+			DB_ALLPET.T_LOCATION_INFO
+		WHERE
+			S_SIDO = #{value}
+		GROUP BY S_GUGUN	
+	</select>
+	
+	<select id="selectAreaDong" resultType="hashmap" parameterType="hashmap">
+		SELECT 	
+			S_DONG
+		FROM 
+			DB_ALLPET.T_LOCATION_INFO
+		WHERE
+			S_SIDO = #{s_sido}
+			AND S_GUGUN = #{s_gugun}
+	</select>
+	<!-- 회원 주소 검색 끝 -->
+	
+	<!-- 커스터마이징 -->
+	
+	<select id="getChildCustom" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			s_cmid,
+			s_parent,
+			n_index,
+			s_status,
+			s_group,
+			s_value,
+			((
+				SELECT
+					COUNT(*)
+				FROM
+					DB_ALLPET.T_CUSTOMIZE
+				WHERE
+					N_INDEX <![CDATA[<]]> A.N_INDEX
+					AND S_ID = #{id}
+					AND S_PARENT = #{parent}
+					AND S_STATUS = 'Y'
+			)+1) AS sequence,
+			s_status,
+			s_name
+		FROM
+			DB_ALLPET.T_CUSTOMIZE A
+		WHERE
+			S_ID = #{id}
+			AND S_PARENT = #{parent}
+			AND S_STATUS = 'Y'
+		ORDER BY
+			N_INDEX ASC
+	</select>
+	
+	<select id="getCustomItem" parameterType="string" resultType="hashmap">
+		SELECT
+			s_cmid,
+			s_parent,
+			n_index,
+			s_value,
+			((
+				SELECT
+					COUNT(*)
+				FROM
+					DB_ALLPET.T_CUSTOMIZE
+				WHERE
+					N_INDEX <![CDATA[<]]> A.N_INDEX
+					AND S_PARENT = A.S_PARENT
+					AND S_STATUS = 'Y'
+					AND S_VISIBLE = 'Y'
+			)+1) AS sequence,
+			s_status,
+			s_group,
+			s_name
+		FROM
+			DB_ALLPET.T_CUSTOMIZE A
+		WHERE
+			S_CMID = #{value}
+		ORDER BY N_INDEX
+	</select>
+	
+	<select id="getCustomLastIndex" parameterType="string" resultType="string">
+		SELECT
+			MAX(N_INDEX) AS last_index
+		FROM
+			DB_ALLPET.T_CUSTOMIZE A
+		WHERE
+			S_ID = #{id}
+			AND S_PARENT = #{parent}
+	</select>
+	
+	<select id="getByParent" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			A.s_cmid,
+			A.s_parent,
+			A.s_status,
+			A.s_group,
+			A.s_value,
+			A.s_name
+		FROM
+			DB_ALLPET.T_CUSTOMIZE A
+		WHERE
+			A.S_ID = #{id}
+			AND A.S_PARENT = #{parent}
+			<if test='group!=null and !group.equals("")'>
+			AND A.S_GROUP = #{group}
+			</if>
+			<if test='status!=null and !status.equals("")'>
+			AND S_STATUS = #{status}
+			</if>
+			<if test='visible!=null and !visible.equals("")'>
+			AND S_VISIBLE = #{visible}
+			</if>
+		ORDER BY
+			A.N_INDEX ASC
+	</select>
+	
+	<select id="getCustomAttr" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			*,
+			'${group}' s_group
+		FROM
+		(
+			SELECT
+				S_ATTR s_key,
+				S_VALUE s_value,
+				2 priority
+			FROM
+				DB_ALLPET.T_CUSTOMIZE_INFO
+			WHERE
+				S_CMID = (SELECT S_CMID FROM DB_ALLPET.T_CUSTOMIZE WHERE S_GROUP = #{group} AND S_ID = #{id})
+			UNION
+			SELECT
+				S_LCODE s_key,
+				S_VALUE s_value,
+				1 priority
+			FROM
+				DB_ALLPET.T_CUSTOM_CATEGORY
+			WHERE
+				S_GROUP = #{group}
+				AND S_LCODE != 'ATTRS'
+		) A
+		GROUP BY s_key
+	</select>
+	
+	<select id="getCustomAttrById" parameterType="string" resultType="hashmap">
+		SELECT
+			*
+		FROM
+		(
+			SELECT
+				S_ATTR s_key,
+				S_VALUE s_value,
+				2 priority
+			FROM
+				DB_ALLPET.T_CUSTOMIZE_INFO
+			WHERE
+				S_CMID = #{value}
+			UNION
+			SELECT
+				S_LCODE s_key,
+				S_VALUE s_value,
+				1 priority
+			FROM
+				DB_ALLPET.T_CUSTOM_CATEGORY
+			WHERE
+				S_GROUP = (SELECT S_GROUP FROM DB_ALLPET.T_CUSTOMIZE WHERE S_CMID = #{value})
+				AND S_LCODE != 'ATTRS'
+		) A
+		GROUP BY s_key
+	</select>
+	
+	<select id="getCustomCategoryByParent" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			s_group,
+			S_LCODE s_key,
+			S_VALUE s_value
+		FROM
+			DB_ALLPET.T_CUSTOM_CATEGORY
+		WHERE
+			S_GROUP IN (
+							SELECT S_GROUP
+							FROM DB_ALLPET.T_CUSTOMIZE
+							WHERE S_PARENT = #{parent}
+								AND S_ID = #{id}
+								<if test='status!=null and !status.equals("")'>
+								AND S_STATUS = #{status}
+								</if>
+						)
+			AND S_LCODE != 'ATTRS'
+	</select>
+	
+	<select id="getCustomInfoByParent" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			s_cmid,
+			S_ATTR s_key,
+			S_VALUE s_value
+		FROM
+			DB_ALLPET.T_CUSTOMIZE_INFO
+		WHERE
+			S_CMID IN (
+						SELECT S_CMID
+						FROM DB_ALLPET.T_CUSTOMIZE
+						WHERE S_PARENT = #{parent}
+							AND S_ID = #{id}
+							<if test='status!=null and !status.equals("")'>
+							AND S_STATUS = #{status}
+							</if>
+					)
+	</select>
+	
+	<!--  -->
+	
+	
+</mapper>

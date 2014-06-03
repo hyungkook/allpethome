@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="Member">
+
+	<select id="getMemberInfo" resultType="hashmap" parameterType="hashmap">
+		SELECT 	
+			A.s_uid, 
+			A.s_cphone_number, 
+			A.s_user_id, 
+			A.s_password, 
+			A.s_name, 
+			A.s_nickname, 
+			A.s_gender, 
+			A.d_birthday, 
+			( 
+				CASE WHEN DATE_FORMAT(NOW() ,'%m%e') >= DATE_FORMAT(A.d_birthday,' %m%e') THEN 
+					YEAR(NOW()) - YEAR(A.d_birthday)
+				ELSE
+					YEAR(NOW()) - YEAR(A.d_birthday) - 1
+				END
+			) AS s_age,
+			A.s_location, 
+			A.s_referer, 
+			A.s_recommender, 
+			A.s_status, 
+			A.s_reg_date, 
+			A.s_withdraw_date, 
+			A.s_comment,
+			A.s_status
+		FROM 
+			DB_ALLPET.T_MEMBER A
+		WHERE S_USER_ID = #{s_user_id}
+		  AND S_PASSWORD = #{s_password}
+	</select>
+	
+	<!-- 회원 접속 정보 저장 -->
+	<update id="updateMemberIPInfo" parameterType="hashmap">
+		UPDATE 
+			DB_ALLPET.T_MEMBER 
+		SET
+			S_LAST_LOGIN_IP = #{s_last_login_ip} , 
+			S_LAST_VISIT_DATE = NOW()
+		WHERE
+			S_UID = #{s_uid}
+	</update>
+	
+	<!-- 아이디 찾기 -->
+	<select id="getID" parameterType="string" resultType="string">
+		SELECT
+			s_user_id
+		FROM DB_ALLPET.T_MEMBER
+		WHERE s_cphone_number = REPLACE(#{s_cphone_number}, '-', '')
+		  AND s_status = 'Y'
+	</select>
+	
+	<!-- 임시 비밀번호 발급 -->
+	<select id="getTempPW" parameterType="hashmap" resultType="string">
+		SELECT
+			LPAD(FLOOR(1 + (RAND() * 99999)), 5, '0') AS temp_pw
+		FROM DB_ALLPET.T_MEMBER
+		WHERE s_cphone_number = REPLACE(#{phone_number}, '-', '')
+		  AND s_user_id = #{id}
+		  AND s_status = 'Y'
+	</select>
+	
+	<!-- 비밀번호 업데이트 -->
+	<select id="updatePW" parameterType="hashmap">
+		UPDATE DB_ALLPET.T_MEMBER SET
+			s_password = #{pw}
+		WHERE S_USER_ID = #{id} 
+		  AND s_cphone_number = REPLACE(#{phone_number}, '-', '')
+		  AND s_status = 'Y'
+	</select>
+	
+	<!-- 아이디(메일) 체크 -->
+	<select id="getMail" resultType="String" parameterType="String">
+	    SELECT 	
+			COUNT(*)
+		FROM 
+			DB_ALLPET.T_MEMBER
+		WHERE S_USER_ID=#{value}
+	</select>
+	
+		<!-- 핸드폰 번호 체크 -->
+	<select id="getMemberHpNumber" resultType="String" parameterType="String"> 
+		SELECT 
+			COUNT(*)
+		FROM DB_ALLPET.T_MEMBER
+		WHERE S_CPHONE_NUMBER = #{value}
+	</select>
+	
+		<!-- 닉네임 체크 -->
+	<select id="getMemberNick" resultType="String" parameterType="String"> 
+		SELECT 
+			COUNT(*)
+		FROM DB_ALLPET.T_MEMBER
+		WHERE S_NICKNAME = #{value}
+	</select>
+		
+		<!-- 추천인 체크 -->
+	<select id="getRecommenderUID" resultType="String" parameterType="String">
+	    SELECT 	
+			S_UID
+		FROM 
+			DB_ALLPET.T_MEMBER
+		WHERE S_STATUS = 'Y'
+			${value}
+	</select>
+	
+	<!-- 회원 가입 -->
+	<insert id="insertMember" parameterType="hashmap">
+		
+		<selectKey keyProperty="s_uid" resultType="java.lang.String" order="BEFORE">
+			SELECT CONCAT('uid_',MD5(NOW()), MD5(#{s_cphone_number})) as s_uid FROM DUAL
+      	</selectKey>
+      
+	    INSERT INTO DB_ALLPET.T_MEMBER (
+			S_UID, 
+			S_CPHONE_NUMBER, 
+			S_USER_ID, 
+			S_PASSWORD, 
+			S_NAME, 
+			S_NICKNAME, 
+			S_GENDER, 
+			D_BIRTHDAY, 
+			S_LOCATION, 
+			S_DO, 
+			S_SIGU, 
+			S_DONG, 
+			S_REFERER, 
+			S_RECOMMENDER, 
+			S_STATUS, 
+			S_REG_IP,
+			S_LAST_LOGIN_IP,
+			S_LAST_VISIT_DATE,
+			S_REG_DATE
+		) VALUES (
+			#{s_uid}, 
+			#{s_cphone_number}, 
+			#{s_user_id}, 
+			#{s_password}, 
+			#{s_name}, 
+			#{s_nickname}, 
+			#{s_gender}, 
+			#{d_birthday}, 
+			#{s_location}, 
+			#{s_do}, 
+			#{s_sigu}, 
+			#{s_dong}, 
+			#{s_referer}, 
+			#{s_recommender}, 
+			#{s_status},
+			#{s_reg_ip},
+			#{s_last_login_ip},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	
+	<!-- 회원 추가 정보 입력/수정 -->
+	<insert id="insertDuplicateMemberOption" parameterType="hashmap">
+		INSERT INTO DB_ALLPET.T_MEMBER_OPTION 
+			(
+			S_UID, 
+			S_PUSH, 
+			S_GPS, 
+			S_NEW_DATE, 
+			S_MAILLING, 
+			S_LAT, 
+			S_LON
+			)
+		VALUES
+			(
+			#{s_uid}, 
+			#{s_push}, 
+			#{s_gps}, 
+			NOW(), 
+			#{s_mailling}, 
+			#{s_lat}, 
+			#{s_lon}
+			)
+		ON DUPLICATE KEY UPDATE
+			<if test="s_push != null">		S_PUSH			= 		#{s_push},</if>
+			<if test="s_gps != null">		S_GPS			=       #{s_gps}, </if>
+			<if test="s_mailling != null">	S_MAILLING		=  		#{s_mailling}, </if>
+			<if test="s_lat != null">		S_LAT			=       #{s_lat}, </if>
+			<if test="s_lon != null">		S_LON			=       #{s_lon},</if>
+			<if test="s_device_id != null">	S_DEVICE_ID		=       #{s_device_id},</if>
+											S_NEW_DATE		=  		NOW()
+	</insert>
+	
+	<!-- 회원 약관 정보 입력 -->
+	<insert id="insertAgreementData" parameterType="hashmap">
+		INSERT INTO DB_ALLPET.T_MEMBER_AGREEMENT (
+			S_UID, 
+			S_AGREEMENT_STATE, 
+			D_DATETIME
+		) VALUES (
+			#{s_uid}, 
+			#{s_agreement_state}, 
+			NOW()
+		)
+	</insert>
+	<!-- 회원가입 : 끝 -->
+	
+</mapper>

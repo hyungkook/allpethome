@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="User.Schedule.v2">
+	
+	<select id="getMonthList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			DISTINCT DATE_FORMAT(D_TODO_DATE,'%Y-%m') AS date, DATE_FORMAT(D_TODO_DATE,'%Y') AS year, DATE_FORMAT(D_TODO_DATE,'%m') AS month
+		FROM
+			DB_ALLPET.T_USER_SCHEDULE
+		WHERE
+			S_UID = #{uid}
+		ORDER BY
+			D_TODO_DATE ASC
+	</select>
+	
+	<select id="getList" parameterType="hashmap" resultType="hashmap">
+		SELECT C.*, D.s_name, D.s_cphone_number
+		FROM
+		(
+			SELECT
+				DATEDIFF(A.d_todo_date,NOW()) AS date_diff,
+				A.D_TODO_DATE AS d_todo_date,
+				A.s_sgid,
+				IF(d_todo_date<![CDATA[<]]>NOW(),'Y','N') AS timeout_flag,
+				S_TYPE AS s_type,
+				(
+					SELECT
+						S_HOSPITAL_NAME
+					FROM
+						DB_ALLPET.T_HOSPITAL_BASIC_INFO
+					WHERE
+						S_SID = A.S_REGISTRANT
+				) AS s_hospital_name,
+				A.d_reg_date AS d_reg_date,
+				A.s_confirmer,
+				A.s_status,
+				A.s_comment,
+				COUNT(*) cnt,
+				B.s_uid
+			FROM
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE
+					WHERE
+						S_STATUS = 'Y'
+						AND (
+							FALSE
+							<if test='type != null and type.equals("month")'>
+							OR DATE_FORMAT(D_TODO_DATE,'%Y-%m') = #{date}
+							</if>
+							<if test='type != null and type.equals("day")'>
+							OR DATE_FORMAT(D_TODO_DATE,'%Y-%m-%d') = #{date}
+							</if>
+						)
+					ORDER BY D_TODO_DATE ASC
+				) A,
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE_DETAIL 
+					WHERE
+						S_UID = #{uid}
+				) B
+			WHERE
+				A.S_SGID = B.S_SGID
+			GROUP BY B.S_SGID
+		) C LEFT OUTER JOIN DB_ALLPET.T_MEMBER D
+		ON
+			C.s_uid = D.S_UID
+		ORDER BY D_TODO_DATE ASC
+		<if test='startRow != null and !startRow.equals("")'>
+		LIMIT ${startRow},${endRow}
+		</if>
+	</select>
+	
+	<select id="getEffectiveNearset" parameterType="string" resultType="hashmap">
+		SELECT
+			DATEDIFF(A.d_todo_date,NOW()) AS date_diff,
+			A.D_TODO_DATE AS d_todo_date,
+			A.S_ROWNUMBER AS s_rownumber,
+			S_TYPE AS s_type,
+			A.s_comment AS s_comment,
+			A.d_reg_date AS d_reg_date
+		FROM
+			DB_ALLPET.T_USER_SCHEDULE A
+		WHERE
+			D_TODO_DATE =
+			(
+				SELECT
+					MIN(d_todo_date)
+				FROM
+					DB_ALLPET.T_USER_SCHEDULE
+				WHERE
+					S_UID = #{value}
+					AND S_STATUS = 'Y'
+					AND NOT (d_todo_date<![CDATA[ < ]]>NOW())
+			)
+		LIMIT 0, 1
+	</select>
+	
+	<select id="getNearestList" parameterType="hashmap" resultType="hashmap">
+		SELECT C.*, D.s_name, D.s_cphone_number
+		FROM
+		(
+			SELECT
+				DATEDIFF(A.d_todo_date,NOW()) AS date_diff,
+				A.D_TODO_DATE AS d_todo_date,
+				A.s_sgid,
+				IF(d_todo_date<![CDATA[<]]>NOW(),'Y','N') AS timeout_flag,
+				S_TYPE AS s_type,
+				(
+					SELECT
+						S_HOSPITAL_NAME
+					FROM
+						DB_ALLPET.T_HOSPITAL_BASIC_INFO
+					WHERE
+						S_SID = A.S_REGISTRANT
+				) AS s_hospital_name,
+				A.d_reg_date AS d_reg_date,
+				A.s_confirmer,
+				A.s_status,
+				A.s_comment,
+				COUNT(*) cnt,
+				B.s_uid
+			FROM
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE
+					WHERE
+						S_STATUS = 'Y'
+						AND d_todo_date > NOW()
+					ORDER BY D_TODO_DATE ASC
+				) A,
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE_DETAIL 
+					WHERE
+						S_UID = #{uid}
+				) B
+			WHERE
+				A.S_SGID = B.S_SGID
+			GROUP BY B.S_SGID
+		) C LEFT OUTER JOIN DB_ALLPET.T_MEMBER D
+		ON
+			C.s_uid = D.S_UID
+		ORDER BY D_TODO_DATE ASC
+		<if test="count != null and !count.equals('')">
+		LIMIT 0, ${count}
+		</if>
+		<if test="count == null or count.equals('')">
+		LIMIT 0, 3
+		</if>
+	</select>
+	
+	<select id="getScheduleInfo" parameterType="string" resultType="hashmap">
+		SELECT
+			s_comment,
+			d_todo_date,
+			s_vaccine_group,
+			g usr_list,
+			c usr_cnt,
+			t terms,
+			k _key
+		FROM
+			DB_ALLPET.T_SCHEDULE A
+			LEFT OUTER JOIN
+			(SELECT S_SGID, GROUP_CONCAT(CONCAT(S_UID,',',S_PID) SEPARATOR ';') g, COUNT(*) c FROM DB_ALLPET.T_SCHEDULE_DETAIL WHERE S_SGID = #{value}) B
+			ON A.S_SGID = B.S_SGID
+			LEFT OUTER JOIN
+			(SELECT S_SGID, GROUP_CONCAT(N_TERM SEPARATOR ';') t, GROUP_CONCAT(S_SMS_KEY SEPARATOR ';') k FROM DB_ALLPET.T_SCHEDULE_MSG WHERE S_SGID = #{value}) C
+			ON A.S_SGID = C.S_SGID
+		WHERE
+			A.S_SGID = #{value}
+	</select>
+	
+	<select id="getSchedule" parameterType="string" resultType="hashmap">
+		SELECT
+			s_sgid,
+			s_type,
+			s_registrant,
+			DATEDIFF(A.d_todo_date,NOW()) AS date_diff,
+			A.d_todo_date AS d_todo_date,
+			DATE_FORMAT(A.d_todo_date,'%Y') AS d_todo_year,
+			DATE_FORMAT(A.d_todo_date,'%m') AS d_todo_month,
+			DATE_FORMAT(A.d_todo_date,'%d') AS d_todo_day,
+			DATE_FORMAT(A.d_todo_date,'%H') AS d_todo_hour,
+			DATE_FORMAT(A.d_todo_date,'%i') AS d_todo_minute,
+			IF(A.d_todo_date<![CDATA[<]]>NOW(),'Y','N') AS timeout_flag,
+			s_comment,
+			s_status,
+			s_confirmer,
+			s_vaccine_group,
+			n_vaccine_index,
+			n_vc_complement,
+			d_reg_date,
+			(
+				CASE A.S_TYPE
+				WHEN 'AHSP' THEN 
+				(
+					SELECT
+						S_HOSPITAL_NAME
+					FROM
+						DB_ALLPET.T_HOSPITAL_BASIC_INFO
+					WHERE
+						S_SID = A.S_REGISTRANT
+				)
+				END
+			) AS s_registrant_name
+		FROM
+			DB_ALLPET.T_SCHEDULE A
+		WHERE
+			S_SGID = #{value}
+	</select>
+	
+	<select id="getScheduleOnDate" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			S_ROWNUMBER AS s_rownumber,
+			S_SID AS s_sid,
+			D_TODO_DATE AS d_todo_date,
+			S_COMMENT AS s_comment
+		FROM
+			DB_ALLPET.T_USER_SCHEDULE
+		WHERE
+			S_UID = #{uid}
+			AND DATE_FORMAT(D_TODO_DATE,'%Y-%m-%d') = #{date}
+	</select>
+	
+	<select id="getScheduleOnMonth" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			S_ROWNUMBER AS s_rownumber,
+			S_SID AS s_sid,
+			D_TODO_DATE AS d_todo_date_time,
+			DATE_FORMAT(D_TODO_DATE,'%Y-%m-%d') AS d_todo_date,
+			S_COMMENT AS s_comment
+		FROM
+			DB_ALLPET.T_USER_SCHEDULE
+		WHERE
+			S_UID = #{uid}
+			AND DATE_FORMAT(D_TODO_DATE,'%Y-%m') = #{month}
+	</select>
+	
+	<insert id="insertSchedule" parameterType="hashmap">
+		INSERT INTO DB_ALLPET.T_SCHEDULE
+		(
+			S_SGID,
+			S_TYPE,
+			S_REGISTRANT,
+			D_TODO_DATE,
+			S_COMMENT,
+			S_STATUS,
+			S_CONFIRMER,
+			S_VACCINE_GROUP,
+			N_VACCINE_INDEX,
+			N_VC_COMPLEMENT,
+			D_REG_DATE
+			<if test='group_id!=null and !group_id.equals("")'>
+			,S_GROUP_ID
+			</if>
+		)
+		VALUES
+		(
+			#{sgid},
+			#{type},
+			#{registrant},
+			#{todo_date},
+			#{comment},
+			'Y',
+			NULL,
+			<if test='vaccine_group==null'>
+			NULL,
+			</if>
+			<if test='vaccine_group!=null'>
+			#{vaccine_group},
+			</if>
+			<if test='vaccine_index==null'>
+			0,
+			</if>
+			<if test='vaccine_index!=null and !vaccine_index.equals("")'>
+			${vaccine_index},
+			</if>
+			0,
+			NOW()
+			<if test='group_id!=null and !group_id.equals("")'>
+			,#{group_id}
+			</if>
+		)
+	</insert>
+	
+	<insert id="insertDetail" parameterType="hashmap">
+		INSERT INTO DB_ALLPET.T_SCHEDULE_DETAIL(S_SD_ROW, S_SGID, S_UID, S_PID, S_STATUS, S_CONFIRMER)
+		VALUES
+		(#{sd_row}, #{sgid}, #{uid}, #{pid}, #{status}, NULL)
+	</insert>
+	
+	<insert id="insertMSG" parameterType="string">
+		INSERT INTO DB_ALLPET.T_SCHEDULE_MSG
+		(S_MSG_ROW, S_SGID, S_TYPE, D_SEND_DATE, N_TERM, S_SMS_KEY)
+		VALUES
+		${value}
+	</insert>
+	
+	<delete id="deleteMSG" parameterType="string">
+		DELETE FROM DB_ALLPET.T_SCHEDULE_MSG WHERE S_SGID = #{value}
+	</delete>
+	
+	<update id="updateSchedule" parameterType="hashmap">
+		<!-- UPDATE
+			DB_ALLPET.T_USER_SCHEDULE
+		SET
+			D_TODO_DATE = #{todo_date},
+			S_COMMENT = #{comment}
+		WHERE
+			S_ROWNUMBER = #{rownum}
+			AND S_UID = #{uid} -->
+		UPDATE DB_ALLPET.T_SCHEDULE
+		SET
+			<trim suffixOverrides=",">
+			<if test='todo_date != null and !todo_date.equals("")'>
+			D_TODO_DATE = #{todo_date},
+			</if>
+			<if test='comment != null and !comment.equals("")'>
+			S_COMMENT = #{comment},
+			</if>
+			<if test='status != null and !status.equals("")'>
+			S_STATUS = #{status},
+			</if>
+			<if test='confirmer != null and !confirmer.equals("")'>
+			S_CONFIRMER = #{confirmer},
+			</if>
+			<if test='complement != null and !complement.equals("")'>
+			N_VC_COMPLEMENT = ${complement}
+			</if>
+			</trim>
+		WHERE
+			S_SGID = #{sgid}
+	</update>
+	
+	<update id="removeSchedule" parameterType="string">
+		UPDATE
+			DB_ALLPET.T_SCHEDULE
+		SET
+			S_STATUS = 'N'
+		WHERE
+			S_SGID = #{value}
+	</update>
+	
+	<select id="getListForCalendar" parameterType="hashmap" resultType="hashmap">
+	
+			SELECT
+				DATE_FORMAT(A.D_TODO_DATE,'%Y%m%d') d,
+				IF(d_todo_date<![CDATA[<]]>NOW(),'Y','N') AS timeout_flag,
+				's' AS type,
+				A.s_comment comment
+			FROM
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE
+					WHERE
+						S_STATUS = 'Y'
+						<if test='type != null and !type.equals("")'>
+						AND S_TYPE = #{type}
+						</if>
+					ORDER BY D_TODO_DATE ASC
+				) A,
+				(
+					SELECT *
+					FROM DB_ALLPET.T_SCHEDULE_DETAIL 
+					WHERE
+						S_UID = #{uid}
+				) B
+			WHERE
+				A.S_SGID = B.S_SGID
+			GROUP BY B.S_SGID
+			ORDER BY D_TODO_DATE ASC
+		
+		<!-- SELECT
+			S_ROWNUMBER row,
+			DATE_FORMAT(A.D_TODO_DATE,'%Y%m%d') d,
+			IF(d_todo_date<![CDATA[<]]>NOW(),'Y','N') AS timeout_flag,
+			's' AS type,
+			A.s_comment comment
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					DB_ALLPET.T_USER_SCHEDULE
+				WHERE
+					S_UID = #{uid}
+					AND S_STATUS = 'Y'
+			) AS A
+		<if test='type != null and !type.equals("")'>
+		WHERE
+			S_TYPE = #{type}
+		</if>
+		ORDER BY D_TODO_DATE ASC -->
+	</select>
+	
+	<select id="getSolarAnniversaryList" parameterType="string" resultType="hashmap">
+
+		SELECT
+			s_type type,
+			s_comment comment,
+			DATE_FORMAT(solar_date,'%Y%m%d') d
+		FROM
+			(
+				SELECT
+					s_type,
+					s_comment,
+					CASE WHEN S_DATE_TYPE='S' THEN DATE_ADD(STR_TO_DATE(CONCAT(#{value},S_DATE),'%Y%m%d'), INTERVAL N_RANGE DAY)
+					WHEN S_DATE_TYPE='L' THEN (SELECT DATE_ADD(STR_TO_DATE(S_SOLAR_DATE,'%Y%m%d'), INTERVAL N_RANGE DAY) FROM DB_ALLPET.T_LUNAR_SOLAR WHERE S_LUNAR_DATE = CONCAT(#{value},S_DATE) AND S_YUN = '0')
+					WHEN S_DATE_TYPE='Y' THEN (SELECT DATE_ADD(STR_TO_DATE(S_SOLAR_DATE,'%Y%m%d'), INTERVAL N_RANGE DAY) FROM DB_ALLPET.T_LUNAR_SOLAR WHERE S_LUNAR_DATE = CONCAT(#{value},S_DATE) ORDER BY S_YUN DESC LIMIT 0,1)
+					ELSE ""
+					END AS solar_date,
+					S_SPECIFIED_DATE,
+					S_CALCEL_DATE
+				FROM
+					DB_ALLPET.T_ANNIVERSARY
+			) A
+		WHERE
+			(S_SPECIFIED_DATE IS NULL OR DATEDIFF(A.solar_date,S_SPECIFIED_DATE)<![CDATA[ >= ]]>0)
+			AND (S_CALCEL_DATE IS NULL OR DATEDIFF(A.solar_date,S_CALCEL_DATE)<![CDATA[ <= ]]>0)
+	</select>
+	
+</mapper>
