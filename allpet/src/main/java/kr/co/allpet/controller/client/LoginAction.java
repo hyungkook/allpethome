@@ -75,7 +75,7 @@ public class LoginAction {
 			model.addAttribute("homePage", "hospitalHome.latte?idx="+hospitalInfo.get("s_sid"));
 		}
 		
-		model.addAttribute("msg", EncodingUtil.fromKorean(msg));
+		model.addAttribute("msg", msg);
 		model.addAttribute("prePage", Common.isNull(request.getHeader("Referer")));
 		model.addAttribute("rePage", Common.isNull(params.get("rePage")));
 		model.addAttribute("type", Common.isNull(params.get("type")));
@@ -236,41 +236,6 @@ public class LoginAction {
 	}
 	
 	
-//	/**
-//	 * 아이디 찾기
-//	 */
-//	@RequestMapping(value = "/findIDForm.latte")
-//	public String findIDForm(Model model, HttpServletRequest request, @RequestParam(required=false) String phone_number, @RequestParam(required=false) String msg) {
-//		
-//		if (Config.DEBUG) logger.info("[Develop Mode] Method - findIDForm");
-//		
-//		model.addAttribute("msg", EncodingUtil.fromKorean(msg));
-//		model.addAttribute("phone_number",phone_number);
-//		
-//		return "client/login/find_id";
-//	}
-//	
-//	@RequestMapping(value = "/findIDAccept.latte")
-//	public String findIDAccept(Model model, HttpServletRequest request, @RequestParam(required=false) String phone_number) {
-//		
-//		if (Config.DEBUG) logger.info("[Develop Mode] Method - findIDAccept");
-//		
-//		String id = Common.isNull(SqlDao.getString("getID", phone_number));
-//		
-//		// 아이디 찾기용
-//		if (id == null || id.equals("")) {
-//			model.addAttribute("msg", "요청하신 휴대폰번호로 검색된 아이디가 없습니다.");
-//			model.addAttribute("phone_number",phone_number);
-//			
-//			return "redirect:findIDForm.latte";
-//			
-//		}
-//		
-//		model.addAttribute("id",id);
-//		
-//		return "redirect:login.latte";
-//	}
-	
 	@RequestMapping(value = "*/ajaxFindIDAccept.latte")
 	public @ResponseBody String ajaxFindIDAccept(Model model, HttpServletRequest request, @RequestParam(required=false) String phone_number) {
 		
@@ -292,60 +257,6 @@ public class LoginAction {
 		
 		return b.build();
 	}
-	
-//	@RequestMapping(value = "/findPWForm.latte")
-//	public String findPWForm(Model model, HttpServletRequest request, @RequestParam(required=false) Map<String, String> params) {
-//		
-//		if (Config.DEBUG) logger.info("[Develop Mode] Method - findPWForm");
-//		
-//		model.addAttribute("msg", EncodingUtil.fromKorean(Common.isNull(params.get("msg"))));
-//		
-//		return "client/login/find_pw";
-//	}
-//	
-//	/**
-//	 * 비밀번호 찾기
-//	 */
-//	@RequestMapping(value = "/findPWAccept.latte")
-//	public String findPWAccept(Model model, HttpServletRequest request, @RequestParam(required=false) Map<String, String> params) {
-//		
-//		if (Config.DEBUG) logger.info("[Develop Mode] Method - findPWAccept");
-//		
-//		// 전화번호 하이픈 제거
-//		params.put("phone_number", params.get("phone_number").replaceAll("-", ""));
-//		
-//		String tempPW = Common.isNull(SqlDao.getString("getTempPW", params));
-//	
-//		if (!tempPW.equals("")) {
-//			
-//			// 기존 비밀번호 업데이트
-//			params.put("pw", tempPW);
-//			int result = SqlDao.update("updatePW", params);
-//			
-//			if (result > 0) {
-//				// SMS발송
-//				
-//				String smsMsg = "임시비밀번호 발급 [ " + tempPW + " ]로 비밀번호가 변경되었습니다.";
-//				
-//				boolean smsInfo = SMSUtil.getInstance().sendSMS(params.get("phone_number"), smsMsg, "비밀번호찾기");
-//				
-//				if (smsInfo == true) {
-//					if (Config.DEBUG) logger.info("[Develop Mode] Method - findPWAccept : Temp PW ({})", tempPW);
-//					model.addAttribute("msg", "임시비밀번호가 발송되었습니다.");
-//				} else {
-//					model.addAttribute("msg", "문자메세지 발송 오류 (오류코드 : 6520)");
-//				}
-//				
-//			}
-//			
-//			
-//		} else {
-//			model.addAttribute("msg", "입력하신 정보의 데이터가 없습니다.");
-//		}
-//		
-//		
-//		return "redirect:findPWForm.latte";
-//	}
 	
 	/**
 	 * 비밀번호 찾기

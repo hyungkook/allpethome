@@ -164,28 +164,11 @@ public class MyPageAction {
 		// 가입 시간 가져오기
 		model.addAttribute("regtime", Common.isNull(SqlDao.getString("MyPage.getMemberRegTime", params), "1"));
 		
-		model.addAttribute("msg", EncodingUtil.fromKorean(params.get("msg")));
+		model.addAttribute("msg", params.get("msg"));
 
 		//return "client/mypage/mmp";
 		return "client/mypage/mypage_modify_personal_info";
 	}
-	
-	/* 패스워드 변경 : 시작 ******************************************************************************************************/
-//	@RequestMapping(value = "/myPagePasswordChangeForm.latte")
-//	public String myPagePasswordChangeForm(Model model, HttpServletRequest request, String msg) {
-//		
-//		//if (Config.DEBUG) logger.info("[Develop Mode] Method - myPagePasswordChangeForm");
-//		
-//		SessionContext sessionContext = (SessionContext) sessionContextFactory.getObject();
-//		
-//		if (sessionContext.isAuth() == false) {
-//			return "redirect:login.latte?rePage=myPageInfo.latte";
-//		}
-//
-//		model.addAttribute("msg", EncodingUtil.fromKorean(msg));
-//		
-//		return "client/mypage/mypage_pw_change";
-//	}
 	
 	@RequestMapping(value = "*/myPagePasswordChangeUpdate.latte")
 	public String myPagePasswordChangeUpdate(Model model, HttpServletRequest request, @RequestParam Map<String, String> params) {
@@ -341,7 +324,7 @@ public class MyPageAction {
 			return "redirect:login.latte?rePage=myPageDropMember.latte";
 		}
 		
-		model.addAttribute("msg", EncodingUtil.fromKorean(msg));
+		model.addAttribute("msg", msg);
 		
 		return "client/mypage/mypage_drop";
 	}

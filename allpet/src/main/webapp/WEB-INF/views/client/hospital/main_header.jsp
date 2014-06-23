@@ -56,9 +56,14 @@ function goKakao(){
 		<%--
 		<p class="img_area"><span><img src="<c:choose><c:when test="${empty logo_img.s_image_path}">${con.IMGPATH}/common/default_logo.jpg</c:when><c:otherwise>${con.img_dns}${logo_img.s_image_path}</c:otherwise></c:choose>" width="79px" height="79px"/></span></p>
 		 --%>
-		 <c:if test="${!empty logo_img.s_image_path}">
-		<p class="img_area"><span><img src="${con.img_dns}${logo_img.s_image_path}" width="79px" height="79px"/></span></p>
-		</c:if><p class="txt01">${hospitalInfo.s_hospital_name}</p>
+		 <c:choose>
+		 <c:when test="${!empty logo_img.s_image_path}">
+			<p class="img_area"><span><img src="${con.img_dns}${logo_img.s_image_path}" width="79px" height="79px"/></span></p>
+			<p class="txt01">${hospitalInfo.s_hospital_name}</p>
+		</c:when>
+		<c:otherwise><p class="txt01" style="margin-top: 130px;">${hospitalInfo.s_hospital_name}</p></c:otherwise>
+		</c:choose>
+		
 	</div>
 	<p class="my_info"><a onclick="goPage('myPageHome.latte');" data-role="button"><img src="${con.IMGPATH}/btn/btn_man.png" alt="" width="13" height="14"/><label><c:choose><c:when test="${params.isLogin eq 'Y'}">내정보</c:when><c:otherwise>로그인</c:otherwise></c:choose></label></a></p>
 	<div class="btn_call">

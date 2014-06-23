@@ -16,18 +16,6 @@
 
 <body>
 <div data-role="page" style="background:#f7f3f4;">
-
-<%-- 	<c:if test="${empty appType}" >
-    <!-- header 시작-->
-    <div data-role="header" id="head" data-position="fixed" data-tap-toggle="false" data-theme="a">
-    	<h1>회원가입</h1>
-        <!--<h1 class="img"><img src="${con.IMGPATH}/common/h1_logo.png" alt="BeautyLatte" width="111" height="32"/>&nbsp;</h1>-->
-        <a href="index.html" data-role="botton" data-rel="back"><img src="${con.IMGPATH}/btn/btn_back.png" alt="back" width="32" height="32"/>&nbsp;</a>
-        <a href="#" data-role="botton" data-rel="menu" id="RightMenu"><img src="${con.IMGPATH}/btn/btn_menu.png" alt="shop" width="32" height="32"/>&nbsp;</a>
-        <a href="index.html" data-role="botton" class="shop"><img src="${con.IMGPATH}/btn/btn_shop.png" alt="shop" width="32" height="32"/>&nbsp;</a>
-    </div>
-    <!-- ///// header 끝-->
-    </c:if> --%>
     
     <!-- content 시작-->
 	<div data-role="content" id="contents">
@@ -41,12 +29,6 @@
         
     </div>
     
-
-    <!-- ///// content 끝-->
-    
-    <!-- footer 시작-->
-	<%-- 	<jsp:include page="/include/client/INC_JSP_FOOTER.jsp"/>  --%>
-    <!-- ///// footer 끝-->
 
 </div>
 

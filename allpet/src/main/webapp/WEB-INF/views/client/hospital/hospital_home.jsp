@@ -86,6 +86,11 @@ ref.parentNode.insertBefore(fpw, ref);
 		var isLogin = '${params.isLogin}';
 		if( isLogin != 'Y'){
 			alert('로그인 하시면 동물 수첩 기능을 사용하실 수 있습니다.');
+		}else{
+			if( window.hybrid ){
+				var msg = '{"type" : "LOGIN","userId" : "' + '${params.userId}' + '"}';
+				window.hybrid.setMessage(msg);
+			}
 		}
 	});
 	
@@ -160,21 +165,15 @@ ref.parentNode.insertBefore(fpw, ref);
 				
 			<!-- 병원소개-->
 			<div class="a_type01_b">
-				<h3><img src="${con.IMGPATH}/common/bu_tt.png" alt="" width="16" height="14" />병원 소개</h3>
-				<p class="txt_type01 mt10">
-					<c:if test="${not empty hospitalInfo.s_introduce}">
-						${fn:replace(fn:replace(hospitalInfo.s_introduce,'<','&lt;'),crlf,'<br/>')}
-					</c:if>
-					<c:if test="${empty hospitalInfo.s_introduce}">
-						등록된 정보가 없습니다.
-					</c:if>
-				</p>
-				<div class="txt_type01 mt15">
-					<dl>
-						<dt id="d_test">스탭</dt>
-						<dd>${hospitalInfo.s_represent_staff_name} 외 ${hospitalInfo.s_staff_count - 1}명</dd>
-					</dl>
-				</div>
+				<c:if test="${not empty hospitalInfo.s_shortIntroduce}">
+					<h3><img src="${con.IMGPATH}/common/bu_tt.png" alt="" width="16" height="14" />인사말</h3>
+					<p class="txt_type01 mt10">
+						${fn:replace(fn:replace(hospitalInfo.s_shortIntroduce,'<','&lt;'),crlf,'<br/>')}
+					</p>
+				</c:if>
+				<c:if test="${empty hospitalInfo.s_introduce}">
+				</c:if>
+				
 				<!-- 소개사진-->
 				<c:choose>
 				<%-- 소개 이미지 2장 이상에서만 슬라이드 활성화 --%>
@@ -220,6 +219,20 @@ ref.parentNode.insertBefore(fpw, ref);
 				</c:otherwise>
 				</c:choose>
 				<!-- //소개사진 끝-->
+			</div>
+			<div class="a_type01_b">
+				<h3><img src="${con.IMGPATH}/common/bu_tt.png" alt="" width="16" height="14" />병원 소개
+				<span style="float:right; font-size: 12px; font-weight: normal;">${hospitalInfo.s_represent_staff_name} 외 ${hospitalInfo.s_staff_count - 1}명</span>
+				<span style="float:right; margin-right: 5px; font-size: 12px; font-weight: normal;">[스탭]</span>
+				</h3>
+				<p class="txt_type01 mt10">
+					<c:if test="${not empty hospitalInfo.s_introduce}">
+						${fn:replace(fn:replace(hospitalInfo.s_introduce,'<','&lt;'),crlf,'<br/>')}
+					</c:if>
+					<c:if test="${empty hospitalInfo.s_introduce}">
+						등록된 정보가 없습니다.
+					</c:if>
+				</p>
 			</div>
 			
 			<!-- 진료시간-->

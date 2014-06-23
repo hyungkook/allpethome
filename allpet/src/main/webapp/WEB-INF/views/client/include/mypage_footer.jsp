@@ -2,5 +2,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 	
 <div id="footer">
-	<p class="txt03 center">copyrightⓒAD VENTURES all rights reserved</p>
+	<p class="txt03 center">copyrightⓒALLPET all rights reserved</p>
 </div>

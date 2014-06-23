@@ -14,6 +14,8 @@
 	<script>
 		function goJoin() {
 			
+
+			
 			var id = $.trim($('#s_user_id').val());
 			var pw = $.trim($('#s_password').val());
 			var pw_re = $.trim($('#s_password_re').val());
@@ -67,8 +69,20 @@
 				return;
 			}
 			
-			document.getElementById("form").action="joinAccept.latte";
-			document.getElementById("form").submit();
+			$.post( "joinAccept.latte", $( "#form" ).serialize() ).done(function( data ) {
+				if( data == "1"){
+					if( window.hybrid ){
+						var msg = '{"type" : "JOIN","userId" : "' + id + '"}';
+						window.hybrid.setMessage(msg);
+					}
+					alert('회원 가입되었습니다.');
+				}else{
+					alert('회원가입에 실패하였습니다. 관리자에게 문의하여 주세요.');
+				}
+				goPage('login.latte?rePage=myPageHome.latte');
+			});
+			//document.getElementById("form").action="joinAccept.latte";
+			//document.getElementById("form").submit();
 		}
 		
 		$(window).load(function(){
@@ -140,7 +154,7 @@
 				<p class="search_input"><input type="text" id="s_name" name="s_name" placeholder="이름"></p>
 			</div>
 			<div class="login_input">
-				<p class="search_input"><input type="text" id="s_cphone_number" name="s_cphone_number" placeholder="전화번호"></p>
+				<p class="search_input"><input type="text" id="s_cphone_number" name="s_cphone_number" placeholder="휴대전화번호"></p>
 			</div>
 			<div class="login_input">
 				<p class="search_input"><input type="password" id="s_password" name="s_password" placeholder="비밀번호"></p>

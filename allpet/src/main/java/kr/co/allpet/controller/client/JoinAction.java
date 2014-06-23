@@ -47,13 +47,13 @@ public class JoinAction {
 			return "redirect:home.latte";
 		}
 		
-		model.addAttribute("msg", EncodingUtil.fromKorean(msg));
+		model.addAttribute("msg", msg);
 		
 		return "client/join/joinForm";
 	}
 	
 	@RequestMapping(value = { "*/joinAccept.latte"})
-	public String joinAccept(Model model, HttpServletRequest request, HttpSession session, @RequestParam Map<String, String> params) {
+	public  @ResponseBody String joinAccept(Model model, HttpServletRequest request, HttpSession session, @RequestParam Map<String, String> params) {
 		
 		//if (Config.DEBUG) logger.info("[Develop Mode] Method - joinTerm");
 		
@@ -88,7 +88,7 @@ public class JoinAction {
 		
 		int result = SqlDao.insert("insertMember", jMap);
 		
-		return "client/join/join_step5";
+		return result + "";
 	}
 	
 	
@@ -232,7 +232,6 @@ public class JoinAction {
 		// Step3에서 저장된 내용 MAP 삽입 후 SESSION 저장
 		jMap.put("s_name", params.get("s_name"));
 		jMap.put("s_nickname", params.get("s_nickname"));
-		//jMap = Common.mapFromKorean(jMap);
 		session.setAttribute("jSession", jMap);
 		
 		

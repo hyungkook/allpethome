@@ -38,9 +38,11 @@ public class HospitalHomeAction {
 		SessionContext sessionContext = (SessionContext) sessionContextFactory.getObject();
 		
 		// 로그인 확인
-		if(sessionContext.isAuth())
+		if(sessionContext.isAuth()){
 			params.put("isLogin", "Y");
-		
+			Map<String, String> userMap = sessionContext.getUserMap();
+			params.put("userId", userMap.get("s_user_id"));
+		}
 		// 파라미터에 sid(idx) 가 없음
 		if(!Common.isValid(params.get("idx"))){
 			

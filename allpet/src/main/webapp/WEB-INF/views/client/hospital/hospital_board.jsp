@@ -229,7 +229,8 @@ function goMenuLink(url){
 					<ul style="position:relative; width:${mainMenuLen * 33}%">
 						<li id="center" style="cursor:pointer;">
 							<c:forEach items="${menuList}" var="item" varStatus="c">
-							<a id="menu${c.index}" style="width:${100.0 / mainMenuLen}%"<c:if test="${c.index eq curMenu-1}"> class="on"</c:if> onclick="goMenuLink('hospitalBoard.latte?idx=${params.idx}&cmid=${item.s_cmid}');">${item.s_name}<span><img src="${con.IMGPATH}/common/b_arrow02.png" alt="" width="10" height="5"/></span></a>
+							<c:set var="www"><fmt:formatNumber value="${100.0 / mainMenuLen}" pattern="0"/></c:set>
+							<a id="menu${c.index}" style="width:${www}%"<c:if test="${c.index eq curMenu-1}"> class="on"</c:if> onclick="goMenuLink('hospitalBoard.latte?idx=${params.idx}&cmid=${item.s_cmid}');">${item.s_name}<span><img src="${con.IMGPATH}/common/b_arrow02.png" alt="" width="10" height="5"/></span></a>
 							</c:forEach>
 						</li>
 					</ul>
