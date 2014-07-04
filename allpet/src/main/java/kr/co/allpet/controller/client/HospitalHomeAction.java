@@ -42,6 +42,7 @@ public class HospitalHomeAction {
 			params.put("isLogin", "Y");
 			Map<String, String> userMap = sessionContext.getUserMap();
 			params.put("userId", userMap.get("s_user_id"));
+			params.put("passwd", userMap.get("s_password"));
 		}
 		// 파라미터에 sid(idx) 가 없음
 		if(!Common.isValid(params.get("idx"))){

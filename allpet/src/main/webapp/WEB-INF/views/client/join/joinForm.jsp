@@ -71,10 +71,6 @@
 			
 			$.post( "joinAccept.latte", $( "#form" ).serialize() ).done(function( data ) {
 				if( data == "1"){
-					if( window.hybrid ){
-						var msg = '{"type" : "JOIN","userId" : "' + id + '"}';
-						window.hybrid.setMessage(msg);
-					}
 					alert('회원 가입되었습니다.');
 				}else{
 					alert('회원가입에 실패하였습니다. 관리자에게 문의하여 주세요.');

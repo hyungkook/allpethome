@@ -88,7 +88,13 @@ ref.parentNode.insertBefore(fpw, ref);
 			alert('로그인 하시면 동물 수첩 기능을 사용하실 수 있습니다.');
 		}else{
 			if( window.hybrid ){
-				var msg = '{"type" : "LOGIN","userId" : "' + '${params.userId}' + '"}';
+				var msg = '{';
+					msg +=' "type" : "LOGIN", ';
+					msg +=' "userId" : "' + '${params.userId}' + '", ';
+					msg +=' "passwd" : "' + '${params.passwd}' + '", ';
+					msg +=' "hospitalTel" : "' + '${hospitalInfo.s_tel}' + '" ';
+					msg +='}';
+				
 				window.hybrid.setMessage(msg);
 			}
 		}

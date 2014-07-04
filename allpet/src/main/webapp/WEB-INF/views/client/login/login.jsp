@@ -20,6 +20,12 @@
 		
 		$(window).load(function(){
 			
+			var userId = '${s_user_id}';
+			console.log(userId);
+			if( userId ){
+				$('#user_id').val(userId);
+			}
+			
 			$('#password').on('keyup',function(){
 				if(event.keyCode==13)
 					goLogin('${type}');

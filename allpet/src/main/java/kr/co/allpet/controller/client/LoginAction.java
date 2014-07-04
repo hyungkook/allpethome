@@ -13,7 +13,6 @@ import kr.co.allpet.utils.client.Codes;
 import kr.co.allpet.utils.client.Config;
 import kr.co.allpet.utils.client.SessionContext;
 import kr.co.allpet.utils.common.Common;
-import kr.co.allpet.utils.common.EncodingUtil;
 import kr.co.allpet.utils.common.JSONSimpleBuilder;
 import kr.co.allpet.utils.common.LogUtil;
 import kr.co.allpet.utils.common.SMSUtil;
@@ -26,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class LoginAction {
@@ -43,7 +43,8 @@ public class LoginAction {
 	public String login(	Model model, 
 							HttpServletRequest request, 
 							@RequestParam Map<String, String> params, 
-							@RequestParam(required=false) String msg	) {
+							@RequestParam(required=false) String msg	
+							) {
 		
 		//if (Config.DEBUG) logger.info("[Develop Mode] Method - login : {}", Common.isNull(params.get("type"),"1") + " (rePage : " + Common.isNull(params.get("rePage"), "Not") + ")");
 		
@@ -57,8 +58,8 @@ public class LoginAction {
 		}
 		
 		try {
-			if (params.get("id") != null && !params.get("id").equals("")) {
-				model.addAttribute("id", params.get("id"));
+			if (params.get("s_user_id") != null && !params.get("s_user_id").equals("")) {
+				model.addAttribute("s_user_id", params.get("s_user_id"));
 			}
 		} catch (NullPointerException e) {
 			
@@ -87,15 +88,20 @@ public class LoginAction {
 	 *  통합 계정 로그인
 	 */
 	@RequestMapping(value = "*/loginAccept.latte")
-	public String loginAccept1(Model model, HttpServletRequest request, SessionContext sessionContext, @RequestParam Map<String, String> params) {
+	public String loginAccept(Model model, HttpServletRequest request, SessionContext sessionContext, @RequestParam Map<String, String> params, RedirectAttributes redirectAttributes) {
 		
-		//if (Config.DEBUG) logger.info("[Develop Mode] Method - loginAccept : {}", Common.isNull(params.get("type"),"1"));
 		
 		Map<String, String> sMap = SqlDao.getMap("getMemberInfo", params);
 
 		try{
 			try{
 				params.put("rePage", URLDecoder.decode(params.get("rePage"), "UTF8"));
+				
+				if( redirectAttributes != null ){
+					redirectAttributes.addAttribute("s_user_id", URLDecoder.decode(params.get("s_user_id"), "UTF8"));
+					redirectAttributes.addAttribute("rePage", URLDecoder.decode(params.get("rePage"), "UTF8"));
+				}
+				
 			}catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -189,31 +195,45 @@ public class LoginAction {
 			
 			/* 로그인 정보 LOG WRITE : 끝남 ************************************************************************/
 			
-			return "redirect:login.latte?rePage=" + params.get("rePage");
+			return "redirect:login.latte";
 			
 		}
 		
 	}
 	
-//	@RequestMapping(value = "*/logout.latte")
-//	public String logout(Model model, HttpSession session) {
-//		
-//		if (Config.DEBUG) logger.info("[Develop Mode] Method - logout");
-//		
-//		SessionContext sessionContext = (SessionContext) sessionContextFactory.getObject();
-//		String rtnUrl = "redirect:hospitalHome.latte?idx=s_sid001";
-//		
-//		//if(session.getAttribute("personalFlag").equals("Y")){
-//		//	rtnUrl = "redirect:"+(String) session.getAttribute("s_per_domain");
-//		//}
-//		
-//		if (sessionContext.isAuth() == false) {
-//			return rtnUrl;
-//		}
-//		
-//		session.invalidate();
-//		return rtnUrl;
-//	}
+	@RequestMapping(value = "/directLogin.latte")
+	public String directLogin(Model model, HttpServletRequest request, SessionContext sessionContext, @RequestParam Map<String, String> params) {
+		
+		String domain = request.getRequestURL().toString();
+		
+		domain = domain.replace("http://", "");
+		domain = domain.substring(0, domain.indexOf("/"));
+		
+		// 병원 정보 가져오기
+		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);
+		
+		String type = params.get("type");
+		
+		// default 
+		String returnUrl = "redirect:"+hospitalInfo.get("s_hospital_id")+"/loginAccept.latte" + 
+								"?s_user_id=" + params.get("s_user_id") + 
+								"&s_password="+params.get("s_password") + 
+								"&rePage="+params.get("rePage");
+		
+		if( type != null && type.equals("SCHEDULE")){
+			
+			// 로그인 후 원하는 페이지로 이동
+			String result = loginAccept(model, request, sessionContext, params, null);
+			if( result.indexOf("home.latte") > 0 ){
+				returnUrl = "redirect:"+hospitalInfo.get("s_hospital_id")+"/myPageScheduleEdit.latte" + 
+						"?rownum=" + params.get("rownum");
+			}else{
+				returnUrl = result;
+			}
+		}
+		
+		return returnUrl;
+	}
 	
 	@RequestMapping(value = "*/ajaxLogout.latte")
 	public @ResponseBody String ajaxLogout(Model model, HttpSession session) {
