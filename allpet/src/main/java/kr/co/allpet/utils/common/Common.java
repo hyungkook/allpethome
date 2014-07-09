@@ -22,6 +22,13 @@ import javax.servlet.http.HttpServletResponse;
 
 public class Common {
 	
+	public static boolean isNotNull(String str) {
+		if (str == null || str.equalsIgnoreCase("null") || "".equals(str)) {
+			return false;
+		}else{
+			return true;
+		}
+	}
 	public static String isNull(String str) {
 		if (str == null || str.equals("null")) {
 			str = "";

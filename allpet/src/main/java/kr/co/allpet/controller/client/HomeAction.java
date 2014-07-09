@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import kr.co.allpet.dao.SqlDao;
-import kr.co.allpet.utils.client.Config;
 import kr.co.allpet.utils.common.Common;
 
 import org.slf4j.Logger;
@@ -25,25 +24,54 @@ public class HomeAction {
 	@RequestMapping(value = "/personalHome.latte")
 	public String personalHome(Model model, HttpServletRequest request, Map<String, String> params, String msg) {
 		
-		//if (Config.DEBUG) logger.info("[Develop Mode] Method - home");
-		
-		//request.get
 		String domain = request.getHeader("referer");//request.getRequestURL().toString();
 		
 		domain = domain.replace("http://", "");
 		domain = domain.substring(0, domain.indexOf("/"));
 		
-		//System.out.println(domain);
-		//model.addAttribute("domain", domain);
-		
 		// 병원 정보 가져오기
 		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);
+		
+		String isMobile = params.get("isMobile");
+		if( isMobile != null && isMobile.equalsIgnoreCase("n")){
+			// pc 에서 접속하였고, 특정 싸이트 연결이 필요한 경우
+			String pcLink = hospitalInfo.get("s_pcLink");
+			if( Common.isNotNull(pcLink)){
+				model.addAttribute("redirectUrl", pcLink);
+				return "returnOtherHome";
+			}
+		}
 		
 		if(hospitalInfo == null){
 			return "client/error/domain_error";
 		} else {
 //			return "redirect:http://m.allpethome.co.kr/"+hospitalInfo.get("s_hospital_id")+"/hospitalHome.latte";
 			return "redirect:"+hospitalInfo.get("s_hospital_id")+"/hospitalHome.latte";
+		}
+	}
+	
+	@RequestMapping(value = "/personalHome2.latte")
+	public String personalHome2(Model model, HttpServletRequest request, Map<String, String> params, String msg) {
+		
+		String domain = request.getHeader("referer");//request.getRequestURL().toString();
+		
+		domain = domain.replace("http://", "");
+		domain = domain.substring(0, domain.indexOf("/"));
+		
+		// 병원 정보 가져오기
+		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);
+		
+		// pc 에서 접속하였고, 특정 싸이트 연결이 필요한 경우
+		if(hospitalInfo == null){
+			return "client/error/domain_error";
+		}else{
+			String pcLink = hospitalInfo.get("s_pcLink");
+			if( Common.isNotNull(pcLink)){
+				model.addAttribute("redirectUrl", pcLink);
+				return "returnOtherHome";
+			} else {
+				return "redirect:"+hospitalInfo.get("s_hospital_id")+"/hospitalHome.latte";
+			}
 		}
 	}
 	
