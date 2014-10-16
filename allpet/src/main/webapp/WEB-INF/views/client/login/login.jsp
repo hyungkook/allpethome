@@ -10,7 +10,7 @@
 <title>로그인</title>
 
 	<jsp:include page="/include/client/INC_JSP_HEADER.jsp"/> 
-	
+	<script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
 	<script>
 		function goLogin(type) {
 			
@@ -124,6 +124,29 @@
 					alert("에러\n"+status+"\n"+error);
 				}
 			});
+			
+		}
+		Kakao.init('1c4449b0d2eef1f32cdc01b22513a07c');
+		function goKakaoLogin(){	//
+			
+			Kakao.Auth.login({
+		        success: function(authObj) {
+		        	console.log(authObj);
+		    		var settings = {
+		    				url : "/v1/user/me",
+	    		    		success : function(resultObj){
+		    					   console.log(resultObj);
+		    				}
+		    							};
+		    		Kakao.API.request(settings);
+		        },
+		        fail : function(errorObj){
+		        	alert(errorObj);
+		        }
+	    	});
+		}
+		
+		function goFacebookLogin(){
 			
 		}
 		
@@ -245,7 +268,18 @@
 			<div class="login_input">
 				<p class="search_input"><input type="password" id="password" name="s_password" placeholder="비밀번호"></p>
 			</div>
-			
+			<!-- 
+			<div class="login_facebook">
+				<p class="btn_bar_shape01 facebook">
+					<a data-role="button" onclick="goFacebookLogin();"><img src="${con.IMGPATH}/icon/icon_fb.png" alt=""  height="20px"/ style="float:left;"><span>&nbsp;페이스북 로그인</span></a>
+				</p>
+			</div>
+			<div class="login_facebook">
+				<p class="btn_bar_shape01 kakao">
+					<a data-role="button" onclick="goKakaoLogin();"><img src="${con.IMGPATH}/icon/icon_kko.png" alt=""  height="20px"/><span style="color: black;">&nbsp;카카오톡 로그인</span></a>
+				</p>
+			</div>
+			 -->
 			<div class="login_btn">
 				<p class="btn_bar_red btn_bar_shape01">
 					<a data-role="button" onclick="goLogin('${type}');"><img src="${con.IMGPATH}/common/login_btn.png" alt="" height="20px"/>&nbsp;<span>로그인</span></a>

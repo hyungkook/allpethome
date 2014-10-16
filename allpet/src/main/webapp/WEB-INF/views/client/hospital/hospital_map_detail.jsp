@@ -59,8 +59,8 @@ try{
 	var pr_3857 = new Tmap.Projection("EPSG:3857"); // 구글 메르카토르 좌표
 	var pr_4326 = new Tmap.Projection("EPSG:4326"); // 위경도 좌표
 
-	var lon = '${hospitalInfo.n_longitude}';
-	var lat = '${hospitalInfo.n_latitude}';
+	var lon = '${hospitalAddress.n_longitude}';
+	var lat = '${hospitalAddress.n_latitude}';
 	
 	if (lat == '') lat = '37.4983590';
 	if (lon == '') lon = '127.0330886';

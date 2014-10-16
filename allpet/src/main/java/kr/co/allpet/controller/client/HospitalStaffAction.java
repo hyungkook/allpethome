@@ -138,16 +138,18 @@ public class HospitalStaffAction {
 		
 		
 		// 병원 기본 정보
-		Map<String, String> info = SqlDao.getMap("Client.Hospital.getSimpleHospitalInfo", params.get("idx"));
+		Map<String, String> info = SqlDao.getMap("Client.Hospital.getHomeInfo", params.get("idx"));
 		
-		// 병원의 Status Info를 가져옴
+		// 병원의 추가 정보를 가져옴
 		params.put("id", params.get("idx"));
-		params.put("group", Codes.STATUS_INFO_GROUP_HOSPITAL);
-		params.put("lcode", Codes.STATUS_INFO_LCODE_INFO);
-		List<Map> flexList = SqlDao.getList("Common.StatusInfo.getInfo", params);
-		// info에 flexList의 값들을 집어넣음
-		info = StatusInfoUtil.merge(flexList, info, false);
+		params.put("s_group", Codes.STATUS_INFO_GROUP_HOSPITAL);
+		params.put("s_lcode", Codes.STATUS_INFO_LCODE_INFO);
+		info = StatusInfoUtil.merge(SqlDao.getList("Common.StatusInfo.getInfo", params), info, false);
+		
+		Map<String, String> hospitalAddress = SqlDao.getMap("Client.Hospital.getAddressInfo", params.get("idx"));
+		
 		model.addAttribute("hospitalInfo", info);
+		model.addAttribute("hospitalAddress", hospitalAddress);
 		
 		// 병원 헤더, 로고 이미지
 		CommonProcess.getInstance().getHospitalHeaderLogoImage(model, params);
@@ -210,9 +212,19 @@ public class HospitalStaffAction {
 		
 		model.addAttribute("params", params);
 		
-		// 최소한의 병원 정보 (병원명 출력 등)
-		model.addAttribute("hospitalInfo", SqlDao.getMap("Client.Hospital.getSimpleHospitalInfo", params.get("idx")));
+		// 병원 기본 정보
+		Map<String, String> info = SqlDao.getMap("Client.Hospital.getHomeInfo", params.get("idx"));
 		
+		// 병원의 추가 정보를 가져옴
+		params.put("id", params.get("idx"));
+		params.put("s_group", Codes.STATUS_INFO_GROUP_HOSPITAL);
+		params.put("s_lcode", Codes.STATUS_INFO_LCODE_INFO);
+		info = StatusInfoUtil.merge(SqlDao.getList("Common.StatusInfo.getInfo", params), info, false);
+		
+		Map<String, String> hospitalAddress = SqlDao.getMap("Client.Hospital.getAddressInfo", params.get("idx"));
+		
+		model.addAttribute("hospitalInfo", info);
+		model.addAttribute("hospitalAddress", hospitalAddress);		
 		return "client/hospital/hospital_staff_info";
 	}
 }

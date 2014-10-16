@@ -145,7 +145,6 @@ function pageDotChange(index) {
 								<dt class="thum"><img src="<c:choose><c:when test="${empty item.image_path}">${con.IMGPATH}/common/default_logo.jpg</c:when><c:otherwise>${con.img_dns}${item.image_path}</c:otherwise></c:choose>" alt="" width="74" height="99"/></dt>
 								<dt class="info mt04">${item.s_position}</dt>
 								<dt class="mt04">${item.s_name}</dt>
-								<dd class="mt08">현 ${hospitalInfo.s_hospital_name} 소속</dd>
 								<dd>${item.s_specialty}</dd>
 							</dl>
 							</li>
@@ -161,7 +160,6 @@ function pageDotChange(index) {
 								<dt class="thum"><img src="<c:choose><c:when test="${empty item.image_path}">${con.IMGPATH}/common/default_logo.jpg</c:when><c:otherwise>${con.img_dns}${item.image_path}</c:otherwise></c:choose>" alt="" width="74" height="99"/></dt>
 								<dt class="info mt04">${item.s_position}</dt>
 								<dt class="mt04">${item.s_name}</dt>
-								<dd class="mt08">현 ${hospitalInfo.s_hospital_name} 소속</dd>
 								<dd>${item.s_specialty}</dd>
 							</dl>
 						</li>

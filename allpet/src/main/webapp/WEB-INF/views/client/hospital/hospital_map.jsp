@@ -116,8 +116,8 @@ function loadMap(){
 		var pr_3857 = new Tmap.Projection("EPSG:3857"); // 구글 메르카토르 좌표
 		var pr_4326 = new Tmap.Projection("EPSG:4326"); // 위경도 좌표
 	
-		var lon = '${hospitalInfo.n_longitude}';
-		var lat = '${hospitalInfo.n_latitude}';
+		var lon = '${hospitalAddress.n_longitude}';
+		var lat = '${hospitalAddress.n_latitude}';
 		
 		if (lat == '') lat = '37.4983590';
 		if (lon == '') lon = '127.0330886';
@@ -192,7 +192,7 @@ function loadMap(){
 			<%-- <iframe id="aaa" style="width:100%; height:100px;" src="${con.dns}/include/client/map.jsp?msg=abc"></iframe> --%>
 			
 			<div class="a_type01">
-				<h3>${hospitalInfo.s_old_addr_sido} ${hospitalInfo.s_old_addr_sigungu} ${hospitalInfo.s_old_addr_dong} ${hospitalInfo.s_old_addr_etc} <span class="txt_type01"></span></h3>
+				<h3>${hospitalAddress.s_old_addr_sido} ${hospitalAddress.s_old_addr_sigungu} ${hospitalAddress.s_old_addr_dong} ${hospitalAddress.s_old_addr_etc} <span class="txt_type01"></span></h3>
 				<div class="w_box mt10" style="position:relative;" onclick="goPage('hospitalMap.latte?idx=${params.idx}&detail=detail')">
 					<div id="map" style="position:relative; width:100%; margin:0 0 0 0;"></div>
 					<p class="blind_txt" onClick="">지도를 누르면 더 자세히 보실 수 있습니다.</p>

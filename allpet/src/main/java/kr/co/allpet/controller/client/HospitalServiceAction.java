@@ -147,13 +147,19 @@ public class HospitalServiceAction {
 		// 병원 헤더, 로고 이미지
 		CommonProcess.getInstance().getHospitalHeaderLogoImage(model, params);
 		
-		// 병원 정보
-		Map<String, String> hospitalInfo = SqlDao.getMap("Client.Hospital.getSimpleHospitalInfo", params.get("idx"));
+		// 병원 기본 정보
+		Map<String, String> info = SqlDao.getMap("Client.Hospital.getHomeInfo", params.get("idx"));
+		
+		// 병원의 추가 정보를 가져옴
 		params.put("id", params.get("idx"));
 		params.put("s_group", Codes.STATUS_INFO_GROUP_HOSPITAL);
 		params.put("s_lcode", Codes.STATUS_INFO_LCODE_INFO);
-		hospitalInfo = StatusInfoUtil.merge(SqlDao.getList("Common.StatusInfo.getInfo", params), hospitalInfo, false);
-		model.addAttribute("hospitalInfo", hospitalInfo);
+		info = StatusInfoUtil.merge(SqlDao.getList("Common.StatusInfo.getInfo", params), info, false);
+		
+		Map<String, String> hospitalAddress = SqlDao.getMap("Client.Hospital.getAddressInfo", params.get("idx"));
+		
+		model.addAttribute("hospitalInfo", info);
+		model.addAttribute("hospitalAddress", hospitalAddress);
 		
 		return "client/hospital/hospital_service";
 	}

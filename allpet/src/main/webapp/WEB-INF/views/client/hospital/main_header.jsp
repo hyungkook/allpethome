@@ -61,7 +61,11 @@ function goKakao(){
 			<p class="img_area"><span><img src="${con.img_dns}${logo_img.s_image_path}" width="79px" height="79px"/></span></p>
 			<p class="txt01">${hospitalInfo.s_hospital_name}</p>
 		</c:when>
-		<c:otherwise><p class="txt01" style="margin-top: 130px;">${hospitalInfo.s_hospital_name}</p></c:otherwise>
+		<c:otherwise>
+			<c:if test="${hospitalInfo.s_hospital_name_use eq 1 }">
+				<p class="txt01" style="margin-top: 130px;">${hospitalInfo.s_hospital_name}</p>
+			</c:if>
+		</c:otherwise>
 		</c:choose>
 		
 	</div>

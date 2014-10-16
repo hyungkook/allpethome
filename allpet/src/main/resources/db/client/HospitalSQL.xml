@@ -29,6 +29,7 @@
 			MI.s_email,
 			MI.s_fax,
 			MI.s_represent_staff,
+			MI.s_hospital_name_use,
 			(
 				SELECT
 					s_name
@@ -58,6 +59,7 @@
 			BI.s_sid,
 			BI.s_hospital_name,
 			MI.s_display_tel,
+			MI.s_hospital_name_use,
 			MI.s_tel
 		FROM
 			DB_ALLPET.T_HOSPITAL_BASIC_INFO BI, DB_ALLPET.T_HOSPITAL_MORE_INFO MI
@@ -165,5 +167,41 @@
 		WHERE
 			S_SID = #{value}
 	</select>
+	
+	<select id="getUserCount" parameterType="string" resultType="hashmap">
+		SELECT
+			S_SID,
+			S_HOSPITAL_NAME,
+			S_TODAY_COUNT,
+			S_TOTAL_COUNT
+		FROM
+			DB_ALLPET.t_user_count
+		WHERE
+			S_SID = #{value}
+	</select>
+	
+	<insert id="insertUserCount" parameterType="hashmap">
+	    INSERT INTO DB_ALLPET.t_user_count (
+			S_SID, 
+			S_HOSPITAL_NAME, 
+			S_TODAY_COUNT, 
+			S_TOTAL_COUNT
+		) VALUES (
+			#{s_sid}, 
+			#{s_hospital_name}, 
+			'1', 
+			'1'
+		)
+	</insert>
+	
+	<update id="updateUserCount" parameterType="hashmap">
+		UPDATE 
+			DB_ALLPET.t_user_count 
+		SET
+			S_TODAY_COUNT = #{S_TODAY_COUNT}  , 
+			S_TOTAL_COUNT = #{S_TOTAL_COUNT} 
+		WHERE
+			S_SID = #{S_SID}
+	</update>
 	
 </mapper>

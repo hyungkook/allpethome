@@ -60,6 +60,18 @@ $(window).load(function(){
 	//initSlideMenu();
 	slideMenu = new SlideMenu(parseInt('${fn:length(menuList)}'));
 });
+
+String.prototype.popupView = function ()
+{
+ var img_view = this;
+
+ //# 초기 팝업창 설정
+  imagez = window.open('', "image", "width="+ 10 +", height="+ 10 +", top=0,left=0,scrollbars=0,resizable=0,toolbar=0,menubar=0,location=0,directories=0,status=0"); 
+ imagez.document.open(); 
+ htmlz = "<html><head><title>▒▒ 이미지 원본 보기 ▒▒</title><style></style></head><body topmargin=0 leftmargin=0 onload='width1=document.all.Timage.width;if(width1>1024)width1=1024;height1=document.all.Timage.height;if(height1>768)height1=768;window.resizeTo(width1+10,height1+58);'><img src='"+img_view+"'  title='클릭하시면 닫힙니다.' name='Timage' id='Timage' style='cursor:hand;' onclick='window.close();'></body></html>" 
+ imagez.document.write(htmlz);
+ imagez.document.close(); 
+}
 </script>
 
 <jsp:include page="board/SlideBoardMenu.jsp"/>
@@ -135,7 +147,7 @@ $(window).load(function(){
 					
 					<c:if test="${needBox eq 'Y'}">
 					<div class="w_box02 mt05" id="video_${c.count}">
-						<c:if test="${not empty item.image_path}"><p class="img_area"><img src="${con.img_dns}${item.image_path}" alt="" width="100%" /></p></c:if>
+						<c:if test="${not empty item.image_path}"><p class="img_area"><img src="${con.img_dns}${item.image_path}" alt="" width="100%" onclick="this.src.popupView()"/></p></c:if>
 						<c:forEach var="video_item" items="${item.videoList}" varStatus="v">
 						<c:if test="${video_item.s_sub_type eq codes.ELEMENT_BOARD_CONTENTS_SUBTYPE_RAW_CODE}">
 							<script>

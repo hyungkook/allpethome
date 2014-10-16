@@ -1,8 +1,10 @@
 package kr.co.allpet.controller.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
 
 import kr.co.allpet.dao.SqlDao;
 import kr.co.allpet.utils.common.Common;
@@ -32,6 +34,13 @@ public class HomeAction {
 		// 병원 정보 가져오기
 		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);
 		
+		// 유저 접속 카운트 입력
+		try{
+			updateUserCount(hospitalInfo);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+				
 		String isMobile = params.get("isMobile");
 		if( isMobile != null && isMobile.equalsIgnoreCase("n")){
 			// pc 에서 접속하였고, 특정 싸이트 연결이 필요한 경우
@@ -50,7 +59,7 @@ public class HomeAction {
 		}
 	}
 	
-	@RequestMapping(value = "/personalHome2.latte")
+	@RequestMapping(value = "/pcView.latte")
 	public String personalHome2(Model model, HttpServletRequest request, Map<String, String> params, String msg) {
 		
 		String domain = request.getHeader("referer");//request.getRequestURL().toString();
@@ -61,17 +70,44 @@ public class HomeAction {
 		// 병원 정보 가져오기
 		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);
 		
+		// 유저 접속 카운트 입력
+		try{
+			updateUserCount(hospitalInfo);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// pc 에서 접속하였고, 특정 싸이트 연결이 필요한 경우
 		if(hospitalInfo == null){
 			return "client/error/domain_error";
 		}else{
 			String pcLink = hospitalInfo.get("s_pcLink");
-			if( Common.isNotNull(pcLink)){
+			String pctype = hospitalInfo.get("s_pctype");
+			
+			if( !"ALLPET".equalsIgnoreCase(pctype) && Common.isNotNull(pcLink)){
 				model.addAttribute("redirectUrl", pcLink);
 				return "returnOtherHome";
 			} else {
-				return "redirect:"+hospitalInfo.get("s_hospital_id")+"/hospitalHome.latte";
+				model.addAttribute("hospitalInfo", hospitalInfo);
+//				return "redirect:"+hospitalInfo.get("s_hospital_id")+"/hospitalHome.latte";
+				return "client/hospital/hospital_pcview";
 			}
+		}
+	}
+	
+	public void updateUserCount(Map<String, String> params){
+		Map<String, String> userCount = SqlDao.getMap("Client.Hospital.getUserCount", params.get("s_sid"));
+		if( userCount == null || userCount.isEmpty() ){
+			userCount = new HashMap<String, String>();
+			userCount.put("s_sid", params.get("s_sid"));
+			userCount.put("s_hospital_name", params.get("s_hospital_name"));
+			SqlDao.insert("Client.Hospital.insertUserCount", userCount);
+		}else{
+			String tdcnt = userCount.get("S_TODAY_COUNT");
+			String ttcnt = userCount.get("S_TOTAL_COUNT"); 
+			userCount.put("S_TODAY_COUNT", (Integer.parseInt(tdcnt) + 1) +"");
+			userCount.put("S_TOTAL_COUNT", (Integer.parseInt(ttcnt) + 1) +"");
+			SqlDao.update("Client.Hospital.updateUserCount", userCount);
 		}
 	}
 	
@@ -81,29 +117,6 @@ public class HomeAction {
 		model.addAttribute("p", params);
 		
 		return "client/eventRoot";
-	}
-	
-	/**
-	 * 테스트용
-	 */
-	@RequestMapping(value = "/gotoHome1.latte")
-	public String gotoHome1(Model model, HttpServletRequest request, Map<String, String> params) {
-		
-		return "client/test/jump";
-	}
-	
-	/**
-	 * 테스트용
-	 */
-	@RequestMapping(value = "/gotoHome2.latte")
-	public String gotoHome2(Model model, HttpServletRequest request, String id) {
-		
-		Map<String,String> hospitalInfo = SqlDao.getMap("Client.Hospital.getSidFromId", id);
-		
-		return "redirect:"+id+"/hospitalHome.latte?idx="+hospitalInfo.get("s_sid");
-		
-		//model.addAttribute("url", "hospitalHome.latte?idx="+hospitalInfo.get("s_sid"));
-		//return "client/test/frameset";
 	}
 	
 	/**

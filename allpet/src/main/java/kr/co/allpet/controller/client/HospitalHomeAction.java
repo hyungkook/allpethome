@@ -1,5 +1,6 @@
 package kr.co.allpet.controller.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -67,7 +68,10 @@ public class HospitalHomeAction {
 		params.put("s_lcode", Codes.STATUS_INFO_LCODE_INFO);
 		info = StatusInfoUtil.merge(SqlDao.getList("Common.StatusInfo.getInfo", params), info, false);
 		
+		Map<String, String> hospitalAddress = SqlDao.getMap("Client.Hospital.getAddressInfo", params.get("idx"));
+		
 		model.addAttribute("hospitalInfo", info);
+		model.addAttribute("hospitalAddress", hospitalAddress);
 		
 		// 업무시간 정보
 		model.addAttribute("workingTimeList", SqlDao.getList("Client.Hospital.getWorkingTime", params.get("idx")));
@@ -92,4 +96,5 @@ public class HospitalHomeAction {
 		
 		return "client/hospital/hospital_home";
 	}
+	
 }
