@@ -120,14 +120,15 @@ function pageDotChange(index) {
 			<jsp:include page="../include/main_menu.jsp"/>
 			
 			<div class="a_type01_b">
-				<div class="btn_select">
-					<a data-role="button">
-					<select id="staff_category" data-icon="false" onchange="goPage('hospitalStaff.latte?idx=${params.idx}&cmid='+$(this).val());">
-						<c:forEach var="item" items="${staffMenu}" varStatus="c">
-							<option value="${item.s_cmid}" <c:if test="${categoryInfo.s_cmid eq item.s_cmid}">selected="selected"</c:if>>${item.s_name}</option>
-						</c:forEach>
-					</select>
-					</a>
+				<h3 class="categoly"><img src="${con.IMGPATH}/common/bu_tt.png" alt="" width="16" height="14" />카테고리</h3>
+				<div class="btn_select05">
+						<a data-role="button">
+						<select id="staff_category" data-icon="false" onchange="goPage('hospitalStaff.latte?idx=${params.idx}&cmid='+$(this).val());">
+							<c:forEach var="item" items="${staffMenu}" varStatus="c">
+								<option value="${item.s_cmid}" <c:if test="${categoryInfo.s_cmid eq item.s_cmid}">selected="selected"</c:if>>${item.s_name}</option>
+							</c:forEach>
+						</select>
+						</a>
 					<p class="bu"><img src="${con.IMGPATH}/common/select_arrow.png" alt="" width="26" height="34"/></p>
 				</div>
 				<div class="w_box mt20">

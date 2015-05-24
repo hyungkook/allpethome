@@ -118,7 +118,14 @@ input.ui-input-text, textarea.ui-input-text{ margin:0; padding:0;}
 .btn_select04 .bu{ position:absolute; top:0; right:8px; width:26px; height:34px; font-size:0; line-height:0; border-left:solid 1px #dedede;}
 
 
-
+.categoly{ position:absolute; top:30px; left:20px; width:100px; height:34px; font-size:12; line-height:0;}
+.btn_select05{ border:solid 1px #dedede; background:#ffffff; border-radius:5px; position:relative; margin-left: 120px;;}
+.btn_select05 .ui-btn-inner   { font-size:15px; line-height:34px; height:34px;}
+.btn_select05 .ui-btn-up-c    { margin:0; padding:0; background:none; box-shadow:none; -webkit-box-shadow:none;}
+.btn_select05 .ui-btn-hover-c { margin:0; padding:0; background:none; box-shadow:none; -webkit-box-shadow:none;}
+.btn_select05 .ui-btn-down-c  { margin:0; padding:0; background:none; box-shadow:none; -webkit-box-shadow:none;}
+.btn_select05 .ui-btn-active  { margin:0; padding:0; background:none; box-shadow:none; -webkit-box-shadow:none;}
+.btn_select05 .bu{ position:absolute; top:0; right:8px; width:26px; height:34px; font-size:0; line-height:0; border-left:solid 1px #dedede;}
 
 /* ----------------- 인풋박스/체크박스/라디오버튼 스타일 ----------------- */
 .input01{ border:solid 1px #dedede; background:#ffffff; border-radius:5px; position:relative; padding:8px 10px 7px 10px;}

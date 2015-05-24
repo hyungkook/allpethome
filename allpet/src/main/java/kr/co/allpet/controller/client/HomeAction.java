@@ -66,6 +66,9 @@ public class HomeAction {
 		
 		domain = domain.replace("http://", "");
 		domain = domain.substring(0, domain.indexOf("/"));
+		if( "www.allpetHome.com".equalsIgnoreCase(domain)){
+			return "homePage";
+		}
 		
 		// 병원 정보 가져오기
 		Map<String,String> hospitalInfo = SqlDao.getMap("getSidbyDomain", domain);

@@ -10,6 +10,7 @@
 <title>로딩..</title>
 
 <script>
+
 var mobileKeyWords = new Array('iPhone', 'iPod', 'BlackBerry', 'Android', 'Windows CE', 'LG', 'MOT', 'SAMSUNG', 'SonyEricsson');
 var isMobile = false;
 for (var word in mobileKeyWords){
