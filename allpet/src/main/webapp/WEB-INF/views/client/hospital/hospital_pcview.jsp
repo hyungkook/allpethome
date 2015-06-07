@@ -31,6 +31,11 @@
           <!-- contents 영역 -->
         <div class="hm">
 			<iframe src="${hospitalInfo.s_hospital_id}/hospitalHome.latte" style=" border-width:0; width:100%; height:100%;" frameborder="0" scrolling="yes" id="ifrm"></iframe>
+			<script type="text/javascript">
+        		function change_parent_url(url){
+				    document.location=url;
+        		}		
+		    </script>
 		</div>
 		
 		<!-- bg 영역 -->
